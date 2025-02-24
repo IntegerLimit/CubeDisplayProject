@@ -28,7 +28,9 @@ fn window_conf() -> Conf {
 async fn main() {
     let near: f32 = 95.0;
     let far: f32 = 105.0;
-    let fov: f32 = PI / 2.0;
+
+    let fov_spd: f32 = 0.5;
+    let mut fov: f32 = PI / 2.0;
 
     let rot_spd: f32 = 1.0;
     let mut rot_x: f32 = PI / 6.0;
@@ -67,6 +69,12 @@ async fn main() {
         }
         if is_key_down(KeyCode::L) {
             n += trs_spd * get_frame_time();
+        }
+        if is_key_down(KeyCode::Q) {
+            fov -= fov_spd * get_frame_time();
+        }
+        if is_key_down(KeyCode::W) {
+            fov += fov_spd * get_frame_time();
         }
         if is_key_pressed(KeyCode::H) {
             show_info = !show_info;
@@ -180,10 +188,11 @@ async fn main() {
 
         if show_info {
             draw_text("Controls:", 25.0, 50.0, 50.0, WHITE);
-            draw_text("Rotate: Arrows", 25.0, 100.0, 40.0, WHITE);
-            draw_text("M: A + D", 25.0, 140.0, 40.0, WHITE);
-            draw_text("N: J + L", 25.0, 180.0, 40.0, WHITE);
-            draw_text("Toggle Info: H", 25.0, 220.0, 40.0, WHITE);
+            draw_text(&format!("FOV (Curr: {:.0}): Q + W", fov / PI * 180.0), 25.0, 100.0, 40.0, WHITE);
+            draw_text("Rotate: Arrows", 25.0, 140.0, 40.0, WHITE);
+            draw_text("M: A + D", 25.0, 180.0, 40.0, WHITE);
+            draw_text("N: J + L", 25.0, 220.0, 40.0, WHITE);
+            draw_text("Toggle Info: H", 25.0, 260.0, 40.0, WHITE);
 
             draw_text("Data:", screen_width() - 175.0, 50.0, 50.0, WHITE);
             draw_text(&*(String::from("MN: ")
