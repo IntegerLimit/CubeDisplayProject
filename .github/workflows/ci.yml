@@ -15,23 +15,23 @@ jobs:
       matrix:
         target:
           # Windows
-          - { displayName: 64-bit Windows,
-              rustTarget: x86_64-pc-windows-gnu,
-              runner: 'ubuntu-latest' }
+          - displayName: Windows (64 Bit),
+            rustTarget: x86_64-pc-windows-gnu,
+            runner: 'ubuntu-latest'
 
           # Linux
-          - { displayName: 64-bit Linux,
-              rustTarget: x86_64-unknown-linux-gnu,
-              runner: 'ubuntu-latest' }
+          - displayName: Linux (64 Bit),
+            rustTarget: x86_64-unknown-linux-gnu,
+            runner: 'ubuntu-latest'
 
           # macOS
-          - { displayName: 64-bit macOS,
-              rustTarget: x86_64-apple-darwin,
-              runner: 'macos-latest' }
+          - displayName: MacOS (64 Bit / Intel),
+            rustTarget: x86_64-apple-darwin,
+            runner: 'macos-latest'
 
-          - { displayName: ARM64 macOS,
-              rustTarget: aarch64-apple-darwin,
-              runner: 'macos-latest' }
+          - displayName: MacOS (Arm64 / Apple Silicon),
+            rustTarget: aarch64-apple-darwin,
+            runner: 'macos-latest'
 
     runs-on: ${{ matrix.target.runner }}
     steps:
@@ -57,5 +57,5 @@ jobs:
       - name: Upload Asset
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.APP_NAME }}-${{ matrix.target.rustTarget }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }}
+          name: ${{ matrix.displayName }}
           path: ./target/${{ matrix.target.rustTarget }}/release/${{ env.APP_NAME }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }}
