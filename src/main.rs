@@ -30,11 +30,11 @@ async fn main() {
     let far: f32 = 105.0;
     let fov: f32 = PI / 2.0;
 
-    let rot_spd: f32 = 0.01;
+    let rot_spd: f32 = 1.0;
     let mut rot_x: f32 = PI / 6.0;
     let mut rot_y: f32 = PI / 6.0;
 
-    let trs_spd: f32 = 0.001;
+    let trs_spd: f32 = 0.2;
     let mut m: f32 = 0.5;
     let mut n: f32 = 0.5;
 
@@ -45,28 +45,28 @@ async fn main() {
 
         // Key handling
         if is_key_down(KeyCode::Left) {
-            rot_y -= rot_spd;
+            rot_y -= rot_spd * get_frame_time();
         }
         if is_key_down(KeyCode::Right) {
-            rot_y += rot_spd;
+            rot_y += rot_spd * get_frame_time();
         }
         if is_key_down(KeyCode::Down) {
-            rot_x -= rot_spd;
+            rot_x -= rot_spd * get_frame_time();
         }
         if is_key_down(KeyCode::Up) {
-            rot_x += rot_spd;
+            rot_x += rot_spd * get_frame_time();
         }
         if is_key_down(KeyCode::A) {
-            m -= trs_spd;
+            m -= trs_spd * get_frame_time();
         }
         if is_key_down(KeyCode::D) {
-            m += trs_spd;
+            m += trs_spd * get_frame_time();
         }
         if is_key_down(KeyCode::J) {
-            n -= trs_spd;
+            n -= trs_spd * get_frame_time();
         }
         if is_key_down(KeyCode::L) {
-            n += trs_spd;
+            n += trs_spd * get_frame_time();
         }
         if is_key_pressed(KeyCode::H) {
             show_info = !show_info;
