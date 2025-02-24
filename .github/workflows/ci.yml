@@ -57,5 +57,5 @@ jobs:
       - name: Upload Asset
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.displayName }}
+          name: ${{ env.APP_NAME }}-${{ matrix.target.displayName }}
           path: ./target/${{ matrix.target.rustTarget }}/release/${{ env.APP_NAME }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }}
