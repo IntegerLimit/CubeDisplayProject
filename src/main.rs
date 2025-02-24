@@ -1,6 +1,7 @@
 mod objects;
 
 use std::cmp::Ordering;
+use std::collections::HashMap;
 use std::f32::consts::PI;
 use std::ops::Add;
 use macroquad::prelude::*;
@@ -95,12 +96,12 @@ async fn main() {
 
         let result_mat = project_mat * to_world_mat;
 
-        let mut to_draw = Vec::new();
+        let mut to_draw_pts = Vec::new();
 
         // Translate Points
         for pt in &mut pts {
             pt.screen_point = Some(to_screen(&pt.vec, &result_mat));
-            to_draw.push(Drawable::Point(pt.clone()))
+            to_draw_pts.push(pt.clone())
         }
 
         // Setup Cube Lines
@@ -122,43 +123,53 @@ async fn main() {
         lns.push(ln(GOLD, d.clone(), d1.clone()));
 
         // M and N Translatable Lines
-        lns.push(ln(PINK, a1.clone(), b.clone()));
-        lns.push(ln(PURPLE, b1.clone(), d1.clone()));
+        lns.push(ln(PINK, a1.clone(), m_vec.clone()));
+        lns.push(ln(PINK, m_vec.clone(), b.clone()));
+        lns.push(ln(PURPLE, b1.clone(), n_vec.clone()));
+        lns.push(ln(PURPLE, n_vec.clone(), d1.clone()));
 
         // MN Line
         lns.push(ln(BEIGE, m_vec.clone(), n_vec.clone()));
 
+        let mut to_draw_lns = Vec::new();
+
         // Add Lines to Draw
         for ln in lns {
-            to_draw.push(Drawable::Line(ln));
+            to_draw_lns.push(ln);
         }
 
         // Sort To Draw
-        to_draw.sort_by(|d1, d2| -> Ordering { d1.draw_comp(d2) });
+        to_draw_lns.sort_by(|d1, d2| -> Ordering { ln_cmp(d1, d2) });
+
+        // Draw Points after the Third Line wants to
+        // Note: All vertices (even M and N) have three lines connecting to them.
+        // This is the only reason this works.
+        let mut pt_draw_counter = HashMap::new();
 
         // Draw
-        //print!("Draw Start\n");
-        for draw in to_draw {
-            match draw {
-                Drawable::Point(pt) => {
-                    //print!("Drawing Pt {} {}\n", pt.name, pt_draw_z(&pt));
-                    draw_circle(pt.screen_point.unwrap().x, pt.screen_point.unwrap().y, 15.0, pt.color);
-                }
-                Drawable::Line(ln) => {
-                    //print!("Drawing Line {}{} {}\n", ln.pt_a.name, ln.pt_b.name, ln_draw_z(&ln));
-                    draw_line(ln.pt_a.screen_point.unwrap().x, ln.pt_a.screen_point.unwrap().y,
-                              ln.pt_b.screen_point.unwrap().x, ln.pt_b.screen_point.unwrap().y,
-                              15.0, ln.color);
-                }
-            }
+        for ln in to_draw_lns {
+            draw_line(ln.pt_a.screen_point.unwrap().x, ln.pt_a.screen_point.unwrap().y,
+                      ln.pt_b.screen_point.unwrap().x, ln.pt_b.screen_point.unwrap().y,
+                      15.0, ln.color);
+
+            update_pt_counter(ln.pt_a, &mut pt_draw_counter);
+            update_pt_counter(ln.pt_b, &mut pt_draw_counter);
         }
 
         draw_text(&*(String::from("MN: ").add(&*(m_vec.vec.distance(n_vec.vec) / 2.0).to_string())), 10.0, 50.0, 50.0, WHITE);
-        draw_text(&*(String::from("M: ").add(&*m.to_string())), 10.0, 100.0, 50.0, WHITE);
-        draw_text(&*(String::from("N: ").add(&*n.to_string())), 10.0, 150.0, 50.0, WHITE);
+        draw_text(&*(String::from("m: ").add(&*m.to_string())), 10.0, 100.0, 50.0, WHITE);
+        draw_text(&*(String::from("n: ").add(&*n.to_string())), 10.0, 150.0, 50.0, WHITE);
 
         next_frame().await
     }
+}
+
+fn update_pt_counter(pt: Point, map: &mut HashMap<String, i32>) {
+    let curr = map.get(&pt.name).unwrap_or(&0) + 1;
+    if curr >= 3 {
+        draw_circle(pt.screen_point.unwrap().x, pt.screen_point.unwrap().y, 15.0, pt.color);
+    }
+    map.insert(pt.name, curr);
 }
 
 fn to_screen(vec4: &Vec4, mat4: &Mat4) -> Vec3 {
