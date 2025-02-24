@@ -1,0 +1,179 @@
+mod objects;
+
+use std::cmp::Ordering;
+use std::f32::consts::PI;
+use std::ops::Add;
+use macroquad::prelude::*;
+use crate::objects::*;
+
+#[macroquad::main("Cube M N Demo")]
+async fn main() {
+    let near: f32 = 145.0;
+    let far: f32 = 155.0;
+    let fov: f32 = PI / 3.0;
+
+    let rot_spd: f32 = 0.01;
+    let mut rot_x: f32 = PI / 6.0;
+    let mut rot_y: f32 = PI / 6.0;
+
+    let trs_spd: f32 = 0.001;
+    let mut m: f32 = 0.5;
+    let mut n: f32 = 0.5;
+
+    loop {
+        clear_background(BLACK);
+
+        // Key handling
+        if is_key_down(KeyCode::Left) {
+            rot_y -= rot_spd;
+        }
+        if is_key_down(KeyCode::Right) {
+            rot_y += rot_spd;
+        }
+        if is_key_down(KeyCode::Down) {
+            rot_x -= rot_spd;
+        }
+        if is_key_down(KeyCode::Up) {
+            rot_x += rot_spd;
+        }
+        if is_key_down(KeyCode::A) {
+            m -= trs_spd;
+        }
+        if is_key_down(KeyCode::D) {
+            m += trs_spd;
+        }
+        if is_key_down(KeyCode::J) {
+            n -= trs_spd;
+        }
+        if is_key_down(KeyCode::L) {
+            n += trs_spd;
+        }
+
+        // Clamping
+        m = m.clamp(0.0, 1.0);
+        n = n.clamp(0.0, 1.0);
+
+        let mut pts = Vec::new();
+        let mut lns = Vec::new();
+
+        // Setup Cube Vertices
+        let mut a = create_point(from_v3(vec3(-1.0, 1.0, -1.0)), String::from("A"), RED);
+        let mut b = create_point(from_v3(vec3(1.0, 1.0, -1.0)), String::from("B"), BLUE);
+        let mut c = create_point(from_v3(vec3(1.0, 1.0, 1.0)), String::from("C"), GREEN);
+        let mut d = create_point(from_v3(vec3(-1.0, 1.0, 1.0)), String::from("D"), YELLOW);
+        let mut a1 = create_point(from_v3(vec3(-1.0, -1.0, -1.0)), String::from("A'"), RED);
+        let mut b1 = create_point(from_v3(vec3(1.0, -1.0, -1.0)), String::from("B'"), BLUE);
+        let mut c1 = create_point(from_v3(vec3(1.0, -1.0, 1.0)), String::from("C'"), GREEN);
+        let mut d1 = create_point(from_v3(vec3(-1.0, -1.0, 1.0)), String::from("D'"), YELLOW);
+
+        // Setup M and N Points
+        let mut m_vec = create_point(a1.vec + (b.vec - a1.vec) * m, String::from("M"), VIOLET);
+        let mut n_vec = create_point(d1.vec + (b1.vec - d1.vec) * n, String::from("N"), MAGENTA);
+
+        // Add Points (Transfer Ownership)
+        pts.push(&mut a);
+        pts.push(&mut b);
+        pts.push(&mut c);
+        pts.push(&mut d);
+        pts.push(&mut a1);
+        pts.push(&mut b1);
+        pts.push(&mut c1);
+        pts.push(&mut d1);
+        pts.push(&mut m_vec);
+        pts.push(&mut n_vec);
+
+        // Matrices
+        let quat = Quat::from_rotation_x(rot_x) * Quat::from_rotation_y(rot_y);
+        let to_world_mat = Mat4::from_scale_rotation_translation(Vec3::splat(1.0), quat, vec3(0.0, 0.0, 150.0));
+
+        let aspect = screen_width() / screen_height();
+        let fov_tan = (fov / 2.0).tan();
+        let project_mat = mat4(Vec4::splat(0.0).with_x(1.0 / (aspect * fov_tan)),
+                               Vec4::splat(0.0).with_y(1.0 / fov_tan),
+                               vec4(0.0, 0.0, -(near + far) / (near - far), 1.0),
+                               Vec4::splat(0.0).with_z((2.0 * near * far) / (near - far)));
+
+        let result_mat = project_mat * to_world_mat;
+
+        let mut to_draw = Vec::new();
+
+        // Translate Points
+        for pt in &mut pts {
+            pt.screen_point = Some(to_screen(&pt.vec, &result_mat));
+            to_draw.push(Drawable::Point(pt.clone()))
+        }
+
+        // Setup Cube Lines
+
+        // Main Edges
+        lns.push(ln_white(a.clone(), b.clone()));
+        lns.push(ln_white(b.clone(), c.clone()));
+        lns.push(ln_white(c.clone(), d.clone()));
+        lns.push(ln_white(d.clone(), a.clone()));
+
+        lns.push(ln(LIME, a1.clone(), b1.clone()));
+        lns.push(ln(LIME, b1.clone(), c1.clone()));
+        lns.push(ln(LIME, c1.clone(), d1.clone()));
+        lns.push(ln(LIME, d1.clone(), a1.clone()));
+
+        lns.push(ln(GOLD, a.clone(), a1.clone()));
+        lns.push(ln(GOLD, b.clone(), b1.clone()));
+        lns.push(ln(GOLD, c.clone(), c1.clone()));
+        lns.push(ln(GOLD, d.clone(), d1.clone()));
+
+        // M and N Translatable Lines
+        lns.push(ln(PINK, a1.clone(), b.clone()));
+        lns.push(ln(PURPLE, b1.clone(), d1.clone()));
+
+        // MN Line
+        lns.push(ln(BEIGE, m_vec.clone(), n_vec.clone()));
+
+        // Add Lines to Draw
+        for ln in lns {
+            to_draw.push(Drawable::Line(ln));
+        }
+
+        // Sort To Draw
+        to_draw.sort_by(|d1, d2| -> Ordering { d1.draw_comp(d2) });
+
+        // Draw
+        //print!("Draw Start\n");
+        for draw in to_draw {
+            match draw {
+                Drawable::Point(pt) => {
+                    //print!("Drawing Pt {} {}\n", pt.name, pt_draw_z(&pt));
+                    draw_circle(pt.screen_point.unwrap().x, pt.screen_point.unwrap().y, 15.0, pt.color);
+                }
+                Drawable::Line(ln) => {
+                    //print!("Drawing Line {}{} {}\n", ln.pt_a.name, ln.pt_b.name, ln_draw_z(&ln));
+                    draw_line(ln.pt_a.screen_point.unwrap().x, ln.pt_a.screen_point.unwrap().y,
+                              ln.pt_b.screen_point.unwrap().x, ln.pt_b.screen_point.unwrap().y,
+                              15.0, ln.color);
+                }
+            }
+        }
+
+        draw_text(&*(String::from("MN: ").add(&*(m_vec.vec.distance(n_vec.vec) / 2.0).to_string())), 10.0, 50.0, 50.0, WHITE);
+        draw_text(&*(String::from("M: ").add(&*m.to_string())), 10.0, 100.0, 50.0, WHITE);
+        draw_text(&*(String::from("N: ").add(&*n.to_string())), 10.0, 150.0, 50.0, WHITE);
+
+        next_frame().await
+    }
+}
+
+fn to_screen(vec4: &Vec4, mat4: &Mat4) -> Vec3 {
+    let result = *mat4 * *vec4;
+    let nx = result.x / result.w * 50.0;
+    let ny = result.y / result.w * 50.0;
+
+    //let screen_x = (nx * screen_width()) / (2.0 * result.w) + screen_width() / 2.0;
+    //let screen_y = (ny * screen_height()) / (2.0 * result.w) + screen_height() / 2.0;
+    let screen_x = nx * screen_width() / 2.0 + screen_width() / 2.0;
+    let screen_y = ny * screen_height() / 2.0 + screen_height() / 2.0;
+
+    vec3(screen_x, screen_y, result.z / result.w)
+}
+
+fn from_v3(vec3: Vec3) -> Vec4 {
+    Vec4::from((vec3, 1.0))
+}
