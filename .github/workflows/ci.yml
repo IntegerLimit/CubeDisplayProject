@@ -11,34 +11,19 @@ jobs:
     env:
       APP_NAME: CubeDisplayProject
     strategy:
+      fail-fast: false
       matrix:
         target:
           # Windows
-          - { displayName: 32-bit Windows,
-              rustTarget: i686-pc-windows-gnu,
-              runner: 'ubuntu-latest' }
-
           - { displayName: 64-bit Windows,
               rustTarget: x86_64-pc-windows-gnu,
               runner: 'ubuntu-latest' }
 
           # Linux
-          - { displayName: 32-bit Linux,
-              rustTarget: i686-unknown-linux-gnu,
-              runner: 'ubuntu-latest' }
-
           - { displayName: 64-bit Linux,
               rustTarget: x86_64-unknown-linux-gnu,
               runner: 'ubuntu-latest' }
-
-          - { displayName: ARM32 ARMv6 Linux,
-              rustTarget: arm-unknown-linux-gnueabi,
-              runner: 'ubuntu-latest' }
-
-          - { displayName: ARM32 ARMv7 Linux,
-              rustTarget: armv7-unknown-linux-gnueabihf,
-              runner: 'ubuntu-latest' }
-
+              
           - { displayName: ARM64 Linux,
               rustTarget: aarch64-unknown-linux-gnu,
               runner: 'ubuntu-latest' }
@@ -46,6 +31,10 @@ jobs:
           # macOS
           - { displayName: 64-bit macOS,
               rustTarget: x86_64-apple-darwin,
+              runner: 'macos-latest' }
+
+          - { displayName: ARM64 macOS,
+              rustTarget: aarch64-apple-darwin,
               runner: 'macos-latest' }
 
     runs-on: ${{ matrix.target.runner }}
