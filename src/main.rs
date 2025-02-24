@@ -7,11 +7,20 @@ use std::ops::Add;
 use macroquad::prelude::*;
 use crate::objects::*;
 
-#[macroquad::main("Cube M N Demo")]
+fn window_conf() -> Conf {
+    Conf {
+        window_title: String::from("Cube M N Demo"),
+        window_width: 1200,
+        window_height: 600,
+        ..Default::default()
+    }
+}
+
+#[macroquad::main(window_conf)]
 async fn main() {
-    let near: f32 = 145.0;
-    let far: f32 = 155.0;
-    let fov: f32 = PI / 3.0;
+    let near: f32 = 95.0;
+    let far: f32 = 105.0;
+    let fov: f32 = PI / 2.0;
 
     let rot_spd: f32 = 0.01;
     let mut rot_x: f32 = PI / 6.0;
@@ -21,15 +30,17 @@ async fn main() {
     let mut m: f32 = 0.5;
     let mut n: f32 = 0.5;
 
+    let mut show_info: bool = true;
+
     loop {
         clear_background(BLACK);
 
         // Key handling
         if is_key_down(KeyCode::Left) {
-            rot_y += rot_spd;
+            rot_y -= rot_spd;
         }
         if is_key_down(KeyCode::Right) {
-            rot_y -= rot_spd;
+            rot_y += rot_spd;
         }
         if is_key_down(KeyCode::Down) {
             rot_x -= rot_spd;
@@ -48,6 +59,9 @@ async fn main() {
         }
         if is_key_down(KeyCode::L) {
             n += trs_spd;
+        }
+        if is_key_pressed(KeyCode::H) {
+            show_info = !show_info;
         }
 
         // Clamping
@@ -85,7 +99,7 @@ async fn main() {
 
         // Matrices
         let quat = Quat::from_rotation_x(rot_x) * Quat::from_rotation_y(rot_y);
-        let to_world_mat = Mat4::from_scale_rotation_translation(Vec3::splat(1.0), quat, vec3(0.0, 0.0, 150.0));
+        let to_world_mat = Mat4::from_scale_rotation_translation(Vec3::splat(1.0), quat, vec3(0.0, 0.0, 100.0));
 
         let aspect = screen_width() / screen_height();
         let fov_tan = (fov / 2.0).tan();
@@ -152,27 +166,40 @@ async fn main() {
                       ln.pt_b.screen_point.unwrap().x, ln.pt_b.screen_point.unwrap().y,
                       15.0, ln.color);
 
-            update_pt_counter(ln.pt_a, &mut pt_draw_counter);
-            update_pt_counter(ln.pt_b, &mut pt_draw_counter);
+            update_pt_counter(ln.pt_a, &mut pt_draw_counter, &show_info);
+            update_pt_counter(ln.pt_b, &mut pt_draw_counter, &show_info);
         }
 
-        draw_text(&*(String::from("MN: ").add(&format!("{:.3}", m_vec.vec.distance(n_vec.vec) / 2.0))),
-                  10.0, 50.0, 50.0, WHITE);
-        draw_text(&*(String::from("m: ").add(&format!("{:.2}", m))),
-                  10.0, 100.0, 50.0, WHITE);
-        draw_text(&*(String::from("n: ").add(&format!("{:.2}", n))),
-                  10.0, 150.0, 50.0, WHITE);
+        if show_info {
+            draw_text("Controls:", 25.0, 50.0, 50.0, WHITE);
+            draw_text("Rotate: Arrows", 25.0, 100.0, 40.0, WHITE);
+            draw_text("M: A + D", 25.0, 140.0, 40.0, WHITE);
+            draw_text("N: J + L", 25.0, 180.0, 40.0, WHITE);
+            draw_text("Toggle Info: H", 25.0, 220.0, 40.0, WHITE);
+
+            draw_text("Data:", screen_width() - 175.0, 50.0, 50.0, WHITE);
+            draw_text(&*(String::from("MN: ")
+                .add(&format!("{:.3}", m_vec.vec.distance(n_vec.vec) / 2.0))),
+                      screen_width() - 175.0, 100.0, 40.0, WHITE);
+            draw_text(&*(String::from("m: ").add(&format!("{:.2}", m))),
+                      screen_width() - 175.0, 140.0, 40.0, WHITE);
+            draw_text(&*(String::from("n: ").add(&format!("{:.2}", n))),
+                      screen_width() - 175.0, 180.0, 40.0, WHITE);
+        }
 
         next_frame().await
     }
 }
 
-fn update_pt_counter(pt: Point, map: &mut HashMap<String, i32>) {
+fn update_pt_counter(pt: Point, map: &mut HashMap<String, i32>, show_info: &bool) {
     let curr = map.get(&pt.name).unwrap_or(&0) + 1;
     if curr >= 3 {
         draw_circle(pt.screen_point.unwrap().x, pt.screen_point.unwrap().y, 15.0, pt.color);
-        draw_text(&pt.name, pt.screen_point.unwrap().x - 15.0,
-                  pt.screen_point.unwrap().y + pt.name_offset_y, 50.0, pt.color);
+
+        if *show_info {
+            draw_text(&pt.name, pt.screen_point.unwrap().x - 15.0,
+                      pt.screen_point.unwrap().y + pt.name_offset_y, 50.0, pt.color);
+        }
     }
     map.insert(pt.name, curr);
 }
