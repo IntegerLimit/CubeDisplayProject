@@ -7,9 +7,10 @@ Utilizes [MacroQuad](https://macroquad.rs/) for rendering to screen, matrix and 
 Has abysmal code quality and optimization.
 
 ## Goals
-Serves two goals:
+Serves three goals:
 - Acts as a demo and representation for a hard to illustrate 3D problem
 - Acts as practice for my 3D projection skills
+- Acts as practice for my Rust skills
 
 The problem resolves around M and N. Find the minimum distance of MN given that ABCD-A'B'C'D' is a cube of side lengths 1.
 
