@@ -15,22 +15,22 @@ jobs:
       matrix:
         target:
           # Windows
-          - displayName: Windows (64 Bit),
-            rustTarget: x86_64-pc-windows-gnu,
+          - displayName: 'windows'
+            rustTarget: 'x86_64-pc-windows-gnu'
             runner: 'ubuntu-latest'
 
           # Linux
-          - displayName: Linux (64 Bit),
-            rustTarget: x86_64-unknown-linux-gnu,
+          - displayName: 'linux'
+            rustTarget: 'x86_64-unknown-linux-gnu'
             runner: 'ubuntu-latest'
 
           # macOS
-          - displayName: MacOS (64 Bit / Intel),
-            rustTarget: x86_64-apple-darwin,
+          - displayName: 'macos-intel'
+            rustTarget: 'x86_64-apple-darwin'
             runner: 'macos-latest'
 
-          - displayName: MacOS (Arm64 / Apple Silicon),
-            rustTarget: aarch64-apple-darwin,
+          - displayName: 'macos-apple-silicon'
+            rustTarget: 'aarch64-apple-darwin'
             runner: 'macos-latest'
 
     runs-on: ${{ matrix.target.runner }}
