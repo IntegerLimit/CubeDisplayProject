@@ -1,10 +1,13 @@
 mod objects;
+mod icons;
 
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::f32::consts::PI;
 use std::ops::Add;
+use macroquad::miniquad::conf::Icon;
 use macroquad::prelude::*;
+use crate::icons::*;
 use crate::objects::*;
 
 fn window_conf() -> Conf {
@@ -12,6 +15,11 @@ fn window_conf() -> Conf {
         window_title: String::from("Cube M N Demo"),
         window_width: 1200,
         window_height: 600,
+        icon: Some(Icon {
+            small: SMALL,
+            medium: MEDIUM,
+            big: BIG,
+        }),
         ..Default::default()
     }
 }
