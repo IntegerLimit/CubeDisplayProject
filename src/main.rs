@@ -26,10 +26,10 @@ async fn main() {
 
         // Key handling
         if is_key_down(KeyCode::Left) {
-            rot_y -= rot_spd;
+            rot_y += rot_spd;
         }
         if is_key_down(KeyCode::Right) {
-            rot_y += rot_spd;
+            rot_y -= rot_spd;
         }
         if is_key_down(KeyCode::Down) {
             rot_x -= rot_spd;
@@ -58,18 +58,18 @@ async fn main() {
         let mut lns = Vec::new();
 
         // Setup Cube Vertices
-        let mut a = create_point(from_v3(vec3(-1.0, 1.0, -1.0)), String::from("A"), RED);
-        let mut b = create_point(from_v3(vec3(1.0, 1.0, -1.0)), String::from("B"), BLUE);
-        let mut c = create_point(from_v3(vec3(1.0, 1.0, 1.0)), String::from("C"), GREEN);
-        let mut d = create_point(from_v3(vec3(-1.0, 1.0, 1.0)), String::from("D"), YELLOW);
-        let mut a1 = create_point(from_v3(vec3(-1.0, -1.0, -1.0)), String::from("A'"), RED);
-        let mut b1 = create_point(from_v3(vec3(1.0, -1.0, -1.0)), String::from("B'"), BLUE);
-        let mut c1 = create_point(from_v3(vec3(1.0, -1.0, 1.0)), String::from("C'"), GREEN);
-        let mut d1 = create_point(from_v3(vec3(-1.0, -1.0, 1.0)), String::from("D'"), YELLOW);
+        let mut a = create_btm_point(from_v3(vec3(-1.0, 1.0, -1.0)), String::from("A"), RED);
+        let mut b = create_btm_point(from_v3(vec3(1.0, 1.0, -1.0)), String::from("B"), BLUE);
+        let mut c = create_btm_point(from_v3(vec3(1.0, 1.0, 1.0)), String::from("C"), GREEN);
+        let mut d = create_btm_point(from_v3(vec3(-1.0, 1.0, 1.0)), String::from("D"), YELLOW);
+        let mut a1 = create_tp_point(from_v3(vec3(-1.0, -1.0, -1.0)), String::from("A'"), RED);
+        let mut b1 = create_tp_point(from_v3(vec3(1.0, -1.0, -1.0)), String::from("B'"), BLUE);
+        let mut c1 = create_tp_point(from_v3(vec3(1.0, -1.0, 1.0)), String::from("C'"), GREEN);
+        let mut d1 = create_tp_point(from_v3(vec3(-1.0, -1.0, 1.0)), String::from("D'"), YELLOW);
 
         // Setup M and N Points
-        let mut m_vec = create_point(a1.vec + (b.vec - a1.vec) * m, String::from("M"), VIOLET);
-        let mut n_vec = create_point(d1.vec + (b1.vec - d1.vec) * n, String::from("N"), MAGENTA);
+        let mut m_vec = create_btm_point(a1.vec + (b.vec - a1.vec) * m, String::from("M"), VIOLET);
+        let mut n_vec = create_tp_point(d1.vec + (b1.vec - d1.vec) * n, String::from("N"), MAGENTA);
 
         // Add Points (Transfer Ownership)
         pts.push(&mut a);
@@ -156,9 +156,12 @@ async fn main() {
             update_pt_counter(ln.pt_b, &mut pt_draw_counter);
         }
 
-        draw_text(&*(String::from("MN: ").add(&*(m_vec.vec.distance(n_vec.vec) / 2.0).to_string())), 10.0, 50.0, 50.0, WHITE);
-        draw_text(&*(String::from("m: ").add(&*m.to_string())), 10.0, 100.0, 50.0, WHITE);
-        draw_text(&*(String::from("n: ").add(&*n.to_string())), 10.0, 150.0, 50.0, WHITE);
+        draw_text(&*(String::from("MN: ").add(&format!("{:.3}", m_vec.vec.distance(n_vec.vec) / 2.0))),
+                  10.0, 50.0, 50.0, WHITE);
+        draw_text(&*(String::from("m: ").add(&format!("{:.2}", m))),
+                  10.0, 100.0, 50.0, WHITE);
+        draw_text(&*(String::from("n: ").add(&format!("{:.2}", n))),
+                  10.0, 150.0, 50.0, WHITE);
 
         next_frame().await
     }
@@ -168,6 +171,8 @@ fn update_pt_counter(pt: Point, map: &mut HashMap<String, i32>) {
     let curr = map.get(&pt.name).unwrap_or(&0) + 1;
     if curr >= 3 {
         draw_circle(pt.screen_point.unwrap().x, pt.screen_point.unwrap().y, 15.0, pt.color);
+        draw_text(&pt.name, pt.screen_point.unwrap().x - 15.0,
+                  pt.screen_point.unwrap().y + pt.name_offset_y, 50.0, pt.color);
     }
     map.insert(pt.name, curr);
 }

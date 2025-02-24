@@ -6,6 +6,7 @@ pub struct Point {
     pub vec: Vec4,
     pub color: Color,
     pub name: String,
+    pub name_offset_y: f32,
     pub screen_point: Option<Vec3>
 }
 
@@ -19,8 +20,12 @@ pub fn ln_cmp(a: &Line, b: &Line) -> Ordering {
     ln_draw_z(b).partial_cmp(&ln_draw_z(a)).unwrap_or(Ordering::Equal)
 }
 
-pub fn create_point(vec: Vec4, name: String, color: Color) -> Point {
-    Point { vec, name, color, screen_point: None }
+pub fn create_btm_point(vec: Vec4, name: String, color: Color) -> Point {
+    Point { vec, name, color, name_offset_y: 50.0, screen_point: None }
+}
+
+pub fn create_tp_point(vec: Vec4, name: String, color: Color) -> Point {
+    Point { vec, name, color, name_offset_y: -25.0, screen_point: None }
 }
 
 pub fn ln_white(pt_a: Point, pt_b: Point) -> Line {
