@@ -209,8 +209,7 @@ fn to_screen(vec4: &Vec4, mat4: &Mat4) -> Vec3 {
     let nx = result.x / result.w * 50.0;
     let ny = result.y / result.w * 50.0;
 
-    //let screen_x = (nx * screen_width()) / (2.0 * result.w) + screen_width() / 2.0;
-    //let screen_y = (ny * screen_height()) / (2.0 * result.w) + screen_height() / 2.0;
+    // Dividing by 2 as original nx/ny is between -1 and 1, we need it between 0 and screen dimensions
     let screen_x = nx * screen_width() / 2.0 + screen_width() / 2.0;
     let screen_y = ny * screen_height() / 2.0 + screen_height() / 2.0;
 
