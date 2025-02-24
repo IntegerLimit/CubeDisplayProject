@@ -16,3 +16,17 @@ The problem resolves around M and N. Find the minimum distance of MN given that 
 
 ## Downloads
 Downloads: [Nightly](https://nightly.link/IntegerLimit/CubeDisplayProject/workflows/ci/main?preview), or just from GHA Artifacts.
+
+## Troubleshooting
+### Unable to Open on Mac (Due to Security)
+1. Go to `System Settings (App)` -> `Privacy and Security`
+2. Scroll Down, Find the `"X" was blocked to protect your Mac.` box, and click `Open Anyway`
+3. Click `Open Anyway` in the dialog box, and enter Password / Touch ID (if requested)
+
+### Unable to Open
+Check you have the right version downloaded for your OS and Architecture!
+
+Also, Linux ARM and Windows ARM is not supported.
+
+### No Window Icon on Linux
+Recently fixed in MiniQuad: [PR](https://github.com/not-fl3/miniquad/pull/532). Should be included in a release soon. Currently, there is no fix (unless you set an icon manually).
