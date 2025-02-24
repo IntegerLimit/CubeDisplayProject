@@ -161,15 +161,8 @@ async fn main() {
         // MN Line
         lns.push(ln(BEIGE, m_vec.clone(), n_vec.clone()));
 
-        let mut to_draw_lns = Vec::new();
-
-        // Add Lines to Draw
-        for ln in lns {
-            to_draw_lns.push(ln);
-        }
-
-        // Sort To Draw
-        to_draw_lns.sort_by(|d1, d2| -> Ordering { ln_cmp(d1, d2) });
+        // Sort Lines
+        lns.sort_by(|d1, d2| -> Ordering { ln_cmp(d1, d2) });
 
         // Draw Points after the Third Line wants to
         // Note: All vertices (even M and N) have three lines connecting to them.
@@ -177,7 +170,7 @@ async fn main() {
         let mut pt_draw_counter = HashMap::new();
 
         // Draw
-        for ln in to_draw_lns {
+        for ln in lns {
             draw_line(ln.pt_a.screen_point.unwrap().x, ln.pt_a.screen_point.unwrap().y,
                       ln.pt_b.screen_point.unwrap().x, ln.pt_b.screen_point.unwrap().y,
                       15.0, ln.color);
@@ -186,9 +179,10 @@ async fn main() {
             update_pt_counter(ln.pt_b, &mut pt_draw_counter, &show_info);
         }
 
+        // Information
         if show_info {
             draw_text("Controls:", 25.0, 50.0, 50.0, WHITE);
-            draw_text(&format!("FOV (Curr: {:.0}): Q + W", fov / PI * 180.0), 25.0, 100.0, 40.0, WHITE);
+            draw_text(&format!("FOV ({:.0}): Q + W", fov / PI * 180.0), 25.0, 100.0, 40.0, WHITE);
             draw_text("Rotate: Arrows", 25.0, 140.0, 40.0, WHITE);
             draw_text("M: A + D", 25.0, 180.0, 40.0, WHITE);
             draw_text("N: J + L", 25.0, 220.0, 40.0, WHITE);

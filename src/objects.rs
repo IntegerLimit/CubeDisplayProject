@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use macroquad::prelude::*;
 
-#[derive (Clone)]
+#[derive(Clone)]
 pub struct Point {
     pub vec: Vec4,
     pub color: Color,
